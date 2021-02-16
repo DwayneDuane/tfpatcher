@@ -4,8 +4,8 @@ import sys
 
 import tensorflow as tf
 from google.protobuf import text_format
-from tensorflow import gfile
-from tensorflow import io
+from tensorflow.compat.v1 import gfile
+from tensorflow.compat.v1 import io
 
 from shape_fetcher import ShapeFetcher
 from reshape_patcher import ReshapePatcher
@@ -92,6 +92,8 @@ node {
 }
 '''
 
+EXPONENTIAL_AVG_FACTOR_ATTR_REGEX = r'attr {\n[\s]+key: "exponential_avg_factor"\n[\s]+value {\n[\s]+f: [\d*]+\.?[\d*]\n[\s]+}\n[\s]+}'
+    
 EXPLICT_PAD_ATTR_REGEX = r'attr {\n[\s]+key: "explicit_paddings"\n[\s]'\
     r'+value {\n[\s]+list {\n[\s]+}\n[\s]+}\n[\s]+}'
 
@@ -194,6 +196,7 @@ def pbtxt_processing(content):
         content = re.sub(U_KEY_ATTR_REGEX, '', content)
         content = re.sub(OUTPUT_SHAPE_REGEX_1, '', content)
         content = re.sub(OUTPUT_SHAPE_REGEX_2, '', content)
+        content = re.sub(EXPONENTIAL_AVG_FACTOR_ATTR_REGEX, '', content)
 
     if content.find('op: "swish_f32"') != -1:
         print('Find unsupported op: swish_f32, patching...')
@@ -251,7 +254,7 @@ if __name__ == "__main__":
 
         PBTXT_FILE = open(pbtxt_file_path, 'r')
 
-        GRAPH_DEF = tf.get_default_graph().as_graph_def(add_shapes=True)
+        GRAPH_DEF = tf.compat.v1.get_default_graph().as_graph_def(add_shapes=True)
 
         FILE_CONTENT = pbtxt_processing(PBTXT_FILE.read())
 
