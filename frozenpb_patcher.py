@@ -92,6 +92,8 @@ node {
 }
 '''
 
+HALF_PIXEL_CENTERS_ATTR_REGEX = r'attr {\n[\s]+key: "half_pixel_centers"\n[\s]+value {\n[\s]+b: (true|false)\n[\s]+}\n[\s]+}'
+
 EXPONENTIAL_AVG_FACTOR_ATTR_REGEX = r'attr {\n[\s]+key: "exponential_avg_factor"\n[\s]+value {\n[\s]+f: [\d*]+\.?[\d*]\n[\s]+}\n[\s]+}'
     
 EXPLICT_PAD_ATTR_REGEX = r'attr {\n[\s]+key: "explicit_paddings"\n[\s]'\
@@ -182,6 +184,10 @@ def patch_mean(content) -> str:
 def pbtxt_processing(content):
     content = patch_mean(content)
 
+    if content.find('half_pixel_centers') != -1:
+        print('Find unsupported attr: half_pixel_centers, removing...\n')
+        content = re.sub(HALF_PIXEL_CENTERS_ATTR_REGEX, '', content)
+         
     if content.find('explicit_paddings') != -1:
         print('Find unsupported attr: explicit_paddings, removing...\n')
         content = re.sub(EXPLICT_PAD_ATTR_REGEX, '', content)
